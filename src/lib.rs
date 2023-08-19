@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use proc_macro2::{TokenStream, TokenTree};
+use quote::ToTokens;
 use syn::{Attribute, Item, Meta};
 
 fn join_inputs(inputs: &[PathBuf]) -> String {
@@ -14,12 +16,33 @@ fn join_inputs(inputs: &[PathBuf]) -> String {
     output
 }
 
-fn get_meta(attrs: &[Attribute]) -> Meta {
-    todo!()
+fn remove_buggy_traits(
+    item: impl IntoIterator<Item = TokenTree>,
+) -> impl Iterator<Item = TokenTree> {
+    let mut skip_next = false;
+    item.into_iter().filter(move |t| {
+        if skip_next {
+            skip_next = false;
+            return false;
+        }
+        match t {
+            TokenTree::Ident(_) => todo!(),
+            _ => true,
+        }
+    })
 }
 
-fn edit_derive_traits(item: &mut Vec<Attribute>) {
-    let attrs = log::info!("Editing derive traits");
+fn edit_derive_traits(attrs: &mut Vec<Attribute>) {
+    log::info!("Editing derive traits");
+    attrs.iter_mut().for_each(|item| match &mut item.meta {
+        Meta::List(meta_list) => {
+            let new_tokens = remove_buggy_traits(meta_list.tokens.clone());
+            meta_list.tokens = new_tokens.collect::<TokenStream>();
+        }
+        _ => todo!(),
+    });
+    log::info!("Finished editing derive traits");
+    log::info!("{:#?}", attrs);
 }
 
 #[cfg(test)]
@@ -67,6 +90,7 @@ mod test {
             }
         }
         let new_src = quote! { #ast }.to_string();
+        println!("{:#?}", ast.items);
         // println!("{}", new_src);
     }
 }

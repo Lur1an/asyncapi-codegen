@@ -2,9 +2,8 @@
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(tag = "event")]
 pub enum OneApiRequestPayload {
-    #[serde(rename="GetUserRoleForModuleAndFailIfNone")]
+    #[serde(rename = "getUserRoleForModuleAndFailIfNone")]
     GetUserRoleForModuleAndFailIfNone(crate::GetUserRoleForModuleAndFailIfNone),
-    #[serde(rename="DeletePackageElement")]
+    #[serde(rename = "deletePackageElement")]
     DeletePackageElement(crate::DeletePackageElement),
 }
-
