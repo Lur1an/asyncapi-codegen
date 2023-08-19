@@ -1,9 +1,7 @@
-use std::path::PathBuf;
-
 use lazy_static::lazy_static;
-use proc_macro2::{Ident, TokenStream, TokenTree};
-use quote::ToTokens;
-use syn::{Attribute, Item, Meta};
+use proc_macro2::{Ident, Literal, TokenStream, TokenTree};
+use std::path::PathBuf;
+use syn::{Attribute, Meta};
 
 /// Joins all source files into one single String file
 /// Adds `use serde::{Deserialize, Serialize};` to the top of the file
@@ -12,6 +10,7 @@ use syn::{Attribute, Item, Meta};
 fn join_inputs(inputs: &[PathBuf]) -> String {
     let mut output = String::new();
     output.push_str("use serde::{Deserialize, Serialize};\n");
+    output.push_str("use monostate::MustBe;\n");
     inputs.iter().for_each(|input| {
         let content = std::fs::read_to_string(input).unwrap();
         let content = content.replace("crate::", "");
@@ -57,11 +56,38 @@ fn remove_buggy_traits(
 fn edit_derive_traits(attrs: &mut Vec<Attribute>) {
     attrs.iter_mut().for_each(|item| {
         if let Meta::List(meta_list) = &mut item.meta {
+            if meta_list.path.segments.first().unwrap().ident != "derive" {
+                return;
+            }
             let new_tokens = remove_buggy_traits(meta_list.tokens.clone());
             meta_list.tokens = new_tokens.collect::<TokenStream>();
         }
     });
 }
+
+fn scan_serde_tag(attrs: &mut Vec<Attribute>) -> Option<Literal> {
+    for item in attrs.iter_mut() {
+        if let Meta::List(meta_list) = &mut item.meta {
+            if meta_list.path.segments.first().unwrap().ident != "serde" {
+                continue;
+            }
+            let tokens = meta_list.tokens.clone().into_iter().collect::<Vec<_>>();
+            match &tokens[..] {
+                [TokenTree::Ident(ident), TokenTree::Punct(punct), TokenTree::Literal(lit)] => {
+                    if ident == "tag" && punct.as_char() == '=' {
+                        return Some(lit.clone());
+                    }
+                }
+                _ => {
+                    return None;
+                }
+            }
+        }
+    }
+    None
+}
+
+fn replace_single_enum_with_str_const() {}
 
 #[cfg(test)]
 mod test {
@@ -73,22 +99,30 @@ mod test {
 
     #[test]
     fn dev_test() {
-        let inputs = std::fs::read_dir("./resources/models")
-            .unwrap()
-            .into_iter()
-            .map(Result::unwrap)
-            .map(|e| e.path())
-            .collect::<Vec<_>>();
-        // let inputs = vec![PathBuf::from("./resources/models/anonymous_schema8.rs")];
+        // let inputs = std::fs::read_dir("./resources/models")
+        //     .unwrap()
+        //     .into_iter()
+        //     .map(Result::unwrap)
+        //     .map(|e| e.path())
+        //     .collect::<Vec<_>>();
+        let inputs = vec![PathBuf::from(
+            "./resources/models/one_api_request_payload.rs",
+        )];
         let joined_file = join_inputs(&inputs);
         let mut ast = parse_str::<File>(&joined_file).unwrap();
-        // println!("{:#?}", ast.items);
+        println!("{:#?}", ast.items);
         let mut structs = HashMap::new();
         let mut enums = HashMap::new();
         for item in ast.items.iter_mut() {
             match item {
                 Item::Enum(enum_item) => {
                     edit_derive_traits(&mut enum_item.attrs);
+                    // Scanning for a #[serde(tag="value")] is needed because modelina duplicates
+                    // the "discriminator" field in all nested structs, however deserialization
+                    // will fail this way because the value of the discriminator field <value> will
+                    // be consumed by the enum tag resolution and then deserialization of inner
+                    // struct fails due to missing <value> field from the left over json fields.
+                    let serde_tag = scan_serde_tag(&mut enum_item.attrs);
                     enums.insert(enum_item.ident.clone(), enum_item);
                 }
                 Item::Struct(struct_item) => {
@@ -99,8 +133,7 @@ mod test {
             }
         }
         // println!("{:#?}", ast.items);
-        println!("{:?}", structs);
         let new_src = quote! { #ast }.to_string();
-        println!("{}", new_src);
+        // println!("{}", new_src);
     }
 }
