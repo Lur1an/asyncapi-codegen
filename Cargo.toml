@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "modelina-rs",
-    "codegen-test"
+    "codegen-test",
+    "modelina-fix"
 ]

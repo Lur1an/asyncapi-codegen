@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-modelina-rs = { path = "../modelina-rs" }
+modelina-fix = { path = "../modelina-fix" }
 
 [dependencies]
 monostate = "0.1.9"

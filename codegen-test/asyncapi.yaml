@@ -43,7 +43,7 @@ components:
       - type: object
         properties:
           event:
-            const: getUser
+            const: deezNuts
           data:
             title: GetUserData
             type: object
@@ -63,7 +63,7 @@ components:
       - type: object
         properties:
           event:
-            const: deleteUser
+            const: someRandomVALUE
           data:
             title: DeleteUserData
             type: object
