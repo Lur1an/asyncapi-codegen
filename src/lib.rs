@@ -1,8 +1,13 @@
 use lazy_static::lazy_static;
 use proc_macro2::{Ident, Literal, Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    process::Command,
+};
 use syn::{parse_str, Attribute, Fields, File, Item, Meta};
+use tempfile::TempDir;
 
 /// Joins all source files into one single String file
 /// Adds library imports to the top of the file
@@ -115,8 +120,27 @@ fn remove_fields_named(fields: &mut Fields, fields_to_remove: &[Ident]) {
         _ => panic!("Only named fields are supported"),
     };
 }
+pub fn generate_models_from_spec(spec_path: &Path) -> String {
+    let temp_dir = TempDir::new().unwrap();
+    let models_path = temp_dir.path();
+    let args = [
+        "generate",
+        "models",
+        "rust",
+        spec_path.to_str().unwrap(),
+        "-o",
+        models_path.to_str().unwrap(),
+    ];
+    let _ = Command::new("asyncapi").args(&args).output().unwrap();
+    let inputs = std::fs::read_dir(models_path)
+        .unwrap()
+        .map(Result::unwrap)
+        .map(|e| e.path());
+    let codegen = generate_models_from_sources(inputs);
+    codegen
+}
 
-pub fn generate_models(inputs: impl Iterator<Item = PathBuf>) -> String {
+pub fn generate_models_from_sources(inputs: impl Iterator<Item = PathBuf>) -> String {
     let joined_file = join_inputs(inputs);
     let mut ast = parse_str::<File>(&joined_file).unwrap();
     let mut enums = HashMap::new();
@@ -180,9 +204,14 @@ mod test {
     fn test_generate_models() {
         let inputs = std::fs::read_dir("./resources/models")
             .unwrap()
-            .into_iter()
             .map(Result::unwrap)
             .map(|e| e.path());
-        let _ = generate_models(inputs);
+        let codegen = generate_models_from_sources(inputs);
+        log::info!("{}", codegen);
+    }
+    #[test]
+    fn test_generate_models_from_spec() {
+        let codegen = generate_models_from_spec(Path::new("./resources/asyncapi-spec.yaml"));
+        log::info!("{}", codegen);
     }
 }
