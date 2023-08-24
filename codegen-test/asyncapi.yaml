@@ -25,7 +25,6 @@ components:
       
   schemas:
     RequestBase:
-      type: object
       properties:
         id:
           type: string
@@ -40,8 +39,10 @@ components:
       description: TODO
       allOf:
       - $ref: '#/components/schemas/RequestBase'
-      - type: object
-        properties:
+      - properties:
+          retardObject:
+            allOf:
+              - const: string
           event:
             const: deezNuts
           data:
