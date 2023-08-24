@@ -71,7 +71,7 @@ fn edit_derive_traits(attrs: &mut [Attribute]) {
     });
 }
 
-fn scan_serde_tag(attrs: &[Attribute]) -> Option<Literal> {
+fn find_serde_tag(attrs: &[Attribute]) -> Option<Literal> {
     for item in attrs.iter() {
         if let Meta::List(meta_list) = &item.meta {
             if meta_list.path.segments.first().unwrap().ident != "serde" {
@@ -99,7 +99,7 @@ fn scan_serde_tag(attrs: &[Attribute]) -> Option<Literal> {
     None
 }
 
-/// Removes all field that match the given identifiers
+/// Remove the field that matches the identifier and return it
 fn remove_field(fields: &mut Fields, field_to_remove: &Ident) -> Option<Field> {
     let mut removed_field = None;
     match fields {
@@ -235,7 +235,7 @@ pub fn generate_models_from_sources(inputs: impl Iterator<Item = PathBuf>) -> St
                 // will fail this way because the value of the discriminator field <value> will
                 // be consumed by the enum tag resolution and then deserialization of inner
                 // struct fails due to missing <value> field from the left over json fields.
-                if let Some(serde_tag) = scan_serde_tag(&enum_item.attrs) {
+                if let Some(serde_tag) = find_serde_tag(&enum_item.attrs) {
                     let variants_to_check = enum_item
                         .variants
                         .iter()

@@ -1,0 +1,104 @@
+asyncapi: '2.6.0'
+info:
+  title: A sample Spec file
+  version: '69.420'
+
+servers:
+  test-server:
+    url: localhost
+    protocol: ws
+
+channels:
+  oneapi:
+    servers:
+      - test-server
+    publish:
+      operationId: SampleRequest
+      message:
+        $ref: '#/components/messages/SampleRequest'
+
+components:
+  messages:
+    SampleRequest:
+      payload: 
+        $ref: '#/components/schemas/SampleRequestPayload'
+      
+  schemas:
+    RequestBase:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "correlation id to match request and response"
+        kind:
+          const: request
+      required:
+        - id
+        - kind
+
+    GetUser:
+      description: TODO
+      discriminant: balls
+      oneOf:
+        - properties:
+            deez:
+              const: nuts
+        - type: object
+          properties:
+            ligma:
+              const: balls
+      allOf:
+      - $ref: '#/components/schemas/RequestBase'
+      - properties:
+          retardObject:
+            allOf:
+              - const: string
+          event:
+            const: deezNuts
+          data:
+            title: GetUserData
+            type: object
+            properties:
+              userId:
+                type: string
+            required:
+              - userId
+        required:
+          - data
+          - event
+
+    DeleteUser:
+      description: TODO
+      allOf:
+      - $ref: '#/components/schemas/RequestBase'
+      - type: object
+        properties:
+          event:
+            const: someRandomVALUE
+          data:
+            title: DeleteUserData
+            type: object
+            properties:
+              userId:
+                type: string
+              userName: 
+                type: string
+            required:
+              - userId
+              - userName
+        required:
+          - data
+          - event
+
+    SampleRequestPayload:
+      description: "SampleRequestPayload"
+      discriminator: event
+      oneOf:
+        - $ref: '#/components/schemas/GetUser'
+        - $ref: '#/components/schemas/DeleteUser'
+
+            
+
+
+
+    

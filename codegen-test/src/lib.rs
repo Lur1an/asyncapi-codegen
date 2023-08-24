@@ -4,11 +4,10 @@ pub mod models {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::models::{AnonymousSchema2, AnonymousSchema4, SampleRequestPayload};
+    use crate::models::SampleRequestPayload;
 
     #[test]
-    fn test_parse_internally_tagged_enum() {
+    fn test_parse_internally_tagged_enum_with_custom_value() {
         let raw_json = r#"{
             "id": "123",
             "kind": "request",

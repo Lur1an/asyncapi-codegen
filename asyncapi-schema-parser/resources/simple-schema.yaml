@@ -1,0 +1,11 @@
+RequestBase:
+  type: object
+  properties:
+    id:
+      type: string
+    kind:
+      type: string
+      const: request
+  required:
+    - id
+    - kind
