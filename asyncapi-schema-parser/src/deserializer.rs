@@ -49,18 +49,20 @@ pub struct SchemaDef {
     pub schema_type: Option<SchemaType>,
     #[serde(rename = "const")]
     pub const_value: Option<String>,
-    format: Option<Format>,
+    pub format: Option<Format>,
     #[serde(rename = "enum")]
     pub enum_values: Option<Vec<String>>,
-    pub one_of: Option<Vec<SchemaDef>>,
-    pub all_of: Option<Vec<SchemaDef>>,
-    pub any_of: Option<Vec<SchemaDef>>,
+    pub one_of: Option<Vec<Schema>>,
+    pub all_of: Option<Vec<Schema>>,
+    pub any_of: Option<Vec<Schema>>,
     pub required: Option<Vec<String>>,
     pub properties: Option<HashMap<String, Schema>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
 #[serde(untagged)]
+/// A Schema can either be a $ref to another Schema or a Definition of a Schema.
+/// This deserializer assumes all top-level types are `SchemaDef`
 pub enum Schema {
     Ref(SchemaRef),
     Def(SchemaDef),
@@ -153,6 +155,6 @@ mod test {
                 type: string
                 const: nuts
         "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let _parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
 }
