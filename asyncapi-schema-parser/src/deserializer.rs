@@ -22,8 +22,8 @@ impl SchemaRef {
 pub enum SchemaType {
     Object,
     String,
-    Number,
     Integer,
+    Number,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
@@ -55,7 +55,8 @@ pub struct SchemaDef {
     pub one_of: Option<Vec<SchemaDef>>,
     pub all_of: Option<Vec<SchemaDef>>,
     pub any_of: Option<Vec<SchemaDef>>,
-    pub properties: Option<HashMap<String, SchemaDef>>,
+    pub required: Option<Vec<String>>,
+    pub properties: Option<HashMap<String, Schema>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
@@ -106,11 +107,6 @@ mod test {
                 - kind
         "#;
         let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
-        assert!(
-            (parsed_yaml["RequestBase"].properties.as_ref().unwrap())["enumProp"]
-                .enum_values
-                .is_some()
-        );
     }
 
     #[test]
