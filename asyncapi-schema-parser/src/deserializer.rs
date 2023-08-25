@@ -55,6 +55,7 @@ pub struct SchemaDef {
     pub one_of: Option<Vec<Schema>>,
     pub all_of: Option<Vec<Schema>>,
     pub any_of: Option<Vec<Schema>>,
+    pub discriminant: Option<String>,
     pub required: Option<Vec<String>>,
     pub properties: Option<HashMap<String, Schema>>,
 }

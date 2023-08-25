@@ -41,17 +41,14 @@ pub struct StructDef {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct EnumDef {
-    pub discriminant: Option<String>,
-    pub variants: Vec<String>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum EntityDef {
     /// A simple definition for a Class-like entity
     Struct(StructDef),
     /// A Collection of Variants and an Optional discriminant
-    OneOf(EnumDef),
+    OneOf {
+        discriminant: Option<String>,
+        variants: Vec<String>,
+    },
     /// AllOf is the inheritance operator, all structs that are inherited are referenced by name
     /// And resolved at generation time
     AllOf(Vec<String>),
@@ -106,6 +103,9 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
     }
 
     if let Some(properties) = def.properties {
+        if def.all_of.is_some() || def.one_of.is_some() {
+            panic!("Schema Definition with properties shouldn't have allOf or oneOf combinators");
+        }
         let mut entities = vec![];
         let mut struct_properties: HashMap<String, Field> = HashMap::new();
         for (field_name, field_def) in properties {
@@ -131,7 +131,10 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
         return entities;
     }
     if let Some(all_of) = def.all_of {
-        let mut all_of_components = vec![];
+        if def.one_of.is_some() {
+            panic!("Schema already has a oneOf combinator, can't have allOf as well");
+        }
+        let mut composing_entities = vec![];
         let mut entities = vec![];
         all_of
             .into_iter()
@@ -141,12 +144,35 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
                     FieldType::Entity { entity_name } => entity_name,
                     _ => panic!("AllOf can only contain entities, no primitive types"),
                 };
-                all_of_components.push(entity_name);
+                composing_entities.push(entity_name);
                 entities.extend(parsed_entities);
             });
         entities.push(Entity {
             name,
-            def: EntityDef::AllOf(all_of_components),
+            def: EntityDef::AllOf(composing_entities),
+        });
+        return entities;
+    }
+    if let Some(one_of) = def.one_of {
+        let mut composing_entities = vec![];
+        let mut entities = vec![];
+        one_of
+            .into_iter()
+            .map(|schema| parse_schema(schema))
+            .for_each(|(parsed_field, parsed_entities)| {
+                let entity_name = match parsed_field {
+                    FieldType::Entity { entity_name } => entity_name,
+                    _ => panic!("AllOf can only contain entities, no primitive types"),
+                };
+                composing_entities.push(entity_name);
+                entities.extend(parsed_entities);
+            });
+        entities.push(Entity {
+            name,
+            def: EntityDef::OneOf {
+                discriminant: def.discriminant,
+                variants: composing_entities,
+            },
         });
         return entities;
     }
