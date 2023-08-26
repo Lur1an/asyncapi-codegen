@@ -1,7 +1,7 @@
 use quote::quote;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::parser::{Entity, EntityDef, FieldType};
+use crate::parser::{Entity, EntityDef, FieldType, PrimitiveType};
 
 pub fn generate_code(entities: Vec<Entity>) -> String {
     let code = entities.into_par_iter().map(generate_entity);
@@ -20,12 +20,34 @@ fn generate_entity(entity: Entity) -> String {
                 .properties
                 .into_iter()
                 .map(|(name, field)| match field.field_type {
-                    FieldType::Entity { entity_name } => {
-                        quote! {
-                            #name: #entity_name
+                    FieldType::Simple {
+                        type_identifier: entity_name,
+                    } => {
+                        if field.optional {
+                            quote! {
+                                #name: Option<#entity_name>
+                            }
+                        } else {
+                            quote! {
+                                #name: #entity_name
+                            }
                         }
                     }
-                    FieldType::String(_) => todo!(),
+                    FieldType::String(f) => match f {
+                        PrimitiveType::Const(const_field) => todo!(),
+                        PrimitiveType::Enum(enum_field) => todo!(),
+                        PrimitiveType::Basic { format } => {
+                            if field.optional {
+                                quote! {
+                                    #name: Option<String>
+                                }
+                            } else {
+                                quote! {
+                                    #name: String
+                                }
+                            }
+                        }
+                    },
                     FieldType::Integer(_) => todo!(),
                     FieldType::Object => todo!(),
                 })
@@ -58,8 +80,8 @@ mod test {
             properties: vec![(
                 "fieldName".to_string(),
                 Field {
-                    field_type: FieldType::Entity {
-                        entity_name: "FieldEntityName".to_string(),
+                    field_type: FieldType::Simple {
+                        type_identifier: "FieldEntityName".to_string(),
                     },
                     optional: false,
                 },

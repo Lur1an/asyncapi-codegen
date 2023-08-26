@@ -24,6 +24,7 @@ pub enum SchemaType {
     String,
     Integer,
     Number,
+    Array,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]

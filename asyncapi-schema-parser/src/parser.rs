@@ -8,7 +8,7 @@ use crate::deserializer::{Schema, SchemaDef, SchemaType};
 /// SchemaProperty can be a reference to a schema by its name or a schema itself
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum FieldType {
-    Entity { entity_name: String },
+    Simple { type_identifier: String },
     String(PrimitiveType<String>),
     Integer(PrimitiveType<i64>),
     Object,
@@ -22,9 +22,12 @@ pub struct Field {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum PrimitiveType<T> {
+    /// This represents a field that MustBe! the inner value `T`
     Const(T),
     Enum(Vec<T>),
-    Basic { format: Option<String> },
+    Basic {
+        format: Option<String>,
+    },
 }
 
 impl<T> Default for PrimitiveType<T> {
@@ -72,21 +75,29 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
     match schema {
         Schema::Ref(schema_ref) => {
             let name = schema_ref.get_schema_name().to_string();
-            (FieldType::Entity { entity_name: name }, vec![])
+            (
+                FieldType::Simple {
+                    type_identifier: name,
+                },
+                vec![],
+            )
         }
         Schema::Def(schema_def) => match schema_def.schema_type {
             Some(SchemaType::Object) => (FieldType::Object, vec![]),
-            Some(SchemaType::String) => (FieldType::String(PrimitiveType::default()), vec![]),
+            Some(SchemaType::String) => {
+                return (FieldType::String(PrimitiveType::default()), vec![]);
+            }
             Some(SchemaType::Integer) => (FieldType::Integer(PrimitiveType::default()), vec![]),
             Some(SchemaType::Number) => (FieldType::Integer(PrimitiveType::default()), vec![]),
+            Some(SchemaType::Array) => todo!(),
             None => {
                 let inner_schema_name = format!(
                     "AnonymousEntity{}",
                     ANONYMOUS_STRUCT_COUNT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
                 );
                 (
-                    FieldType::Entity {
-                        entity_name: inner_schema_name.clone(),
+                    FieldType::Simple {
+                        type_identifier: inner_schema_name.clone(),
                     },
                     parse_entity(schema_def, inner_schema_name),
                 )
@@ -141,7 +152,9 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
             .map(|schema| parse_schema(schema))
             .for_each(|(parsed_field, parsed_entities)| {
                 let entity_name = match parsed_field {
-                    FieldType::Entity { entity_name } => entity_name,
+                    FieldType::Simple {
+                        type_identifier: entity_name,
+                    } => entity_name,
                     _ => panic!("AllOf can only contain entities, no primitive types"),
                 };
                 composing_entities.push(entity_name);
@@ -161,7 +174,9 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
             .map(|schema| parse_schema(schema))
             .for_each(|(parsed_field, parsed_entities)| {
                 let entity_name = match parsed_field {
-                    FieldType::Entity { entity_name } => entity_name,
+                    FieldType::Simple {
+                        type_identifier: entity_name,
+                    } => entity_name,
                     _ => panic!("AllOf can only contain entities, no primitive types"),
                 };
                 composing_entities.push(entity_name);

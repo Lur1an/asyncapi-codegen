@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 lazy_static = "1.4.0"
+monostate = "0.1.9"
 pretty_assertions = "1.4.0"
 quote = "1.0.33"
 rayon = "1.7.0"
