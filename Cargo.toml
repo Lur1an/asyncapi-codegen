@@ -1,6 +1,5 @@
 [workspace]
 members = [
     "codegen-test",
-    "modelina-fix",
-    "asyncapi-schema-parser"
+    "asyncapi-models"
 ]
