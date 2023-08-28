@@ -1,7 +1,7 @@
 use quote::quote;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::parser::{Entity, EntityDef, FieldType, PrimitiveType};
+use crate::parser::{Entity, EntityDef, FieldType};
 
 pub fn generate_code(entities: Vec<Entity>) -> String {
     let code = entities.into_par_iter().map(generate_entity);
@@ -20,36 +20,18 @@ fn generate_entity(entity: Entity) -> String {
                 .properties
                 .into_iter()
                 .map(|(name, field)| match field.field_type {
-                    FieldType::Simple {
-                        type_identifier: entity_name,
-                    } => {
+                    FieldType::Named(type_identifier) => {
                         if field.optional {
                             quote! {
-                                #name: Option<#entity_name>
+                                #name: Option<#type_identifier>
                             }
                         } else {
                             quote! {
-                                #name: #entity_name
+                                #name: #type_identifier
                             }
                         }
                     }
-                    FieldType::String(f) => match f {
-                        PrimitiveType::Const(const_field) => todo!(),
-                        PrimitiveType::Enum(enum_field) => todo!(),
-                        PrimitiveType::Basic { format } => {
-                            if field.optional {
-                                quote! {
-                                    #name: Option<String>
-                                }
-                            } else {
-                                quote! {
-                                    #name: String
-                                }
-                            }
-                        }
-                    },
-                    FieldType::Integer(_) => todo!(),
-                    FieldType::Object => todo!(),
+                    _ => todo!(),
                 })
                 .collect::<Vec<_>>();
             quote! {
@@ -64,13 +46,14 @@ fn generate_entity(entity: Entity) -> String {
             variants,
         } => todo!(),
         EntityDef::AllOf(all_of) => todo!(),
+        EntityDef::Enum(_) => todo!(),
     };
     code.to_string()
 }
 
 #[cfg(test)]
 mod test {
-    use crate::parser::{Field, PrimitiveType, StructDef};
+    use crate::parser::{Field, StructDef};
 
     use super::*;
 
@@ -80,14 +63,13 @@ mod test {
             properties: vec![(
                 "fieldName".to_string(),
                 Field {
-                    field_type: FieldType::Simple {
-                        type_identifier: "FieldEntityName".to_string(),
-                    },
+                    field_type: FieldType::Named("FieldEntityName".to_string()),
                     optional: false,
                 },
             )]
             .into_iter()
             .collect(),
+            additional_properties: None,
         });
         let entity = Entity {
             name: "EntityName".to_string(),

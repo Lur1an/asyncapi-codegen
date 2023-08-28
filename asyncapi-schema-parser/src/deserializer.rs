@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use monostate::MustBe;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
@@ -41,24 +42,90 @@ pub enum Format {
     DateTime,
 }
 
-/// SchemaProperty can be a reference to a schema by its name or a schema itself
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct SchemaDef {
-    pub title: Option<String>,
-    #[serde(rename = "type")]
-    pub schema_type: Option<SchemaType>,
-    #[serde(rename = "const")]
-    pub const_value: Option<String>,
-    pub format: Option<Format>,
-    #[serde(rename = "enum")]
-    pub enum_values: Option<Vec<String>>,
-    pub one_of: Option<Vec<Schema>>,
-    pub all_of: Option<Vec<Schema>>,
-    pub any_of: Option<Vec<Schema>>,
-    pub discriminant: Option<String>,
-    pub required: Option<Vec<String>>,
-    pub properties: Option<HashMap<String, Schema>>,
+#[serde(untagged)]
+pub enum PrimitiveType<T> {
+    Const {
+        #[serde(rename = "const")]
+        const_value: T,
+    },
+    Enum {
+        #[serde(rename = "enum")]
+        enum_values: Vec<T>,
+    },
+    Basic {
+        format: Option<Format>,
+    },
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+pub enum AdditionalProperties {
+    Boolean(bool),
+    Schema(Box<Schema>),
+}
+
+impl Default for AdditionalProperties {
+    fn default() -> Self {
+        AdditionalProperties::Boolean(false)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+pub enum SchemaDef {
+    Object {
+        title: Option<String>,
+        #[serde(rename = "type")]
+        schema_type: MustBe!("object"),
+        #[serde(default)]
+        additional_properties: AdditionalProperties,
+        properties: Option<HashMap<String, Schema>>,
+        #[serde(default)]
+        required: Vec<String>,
+    },
+    String {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("string"),
+        #[serde(flatten)]
+        type_def: PrimitiveType<String>,
+    },
+    Integer {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("integer"),
+        #[serde(flatten)]
+        type_def: PrimitiveType<i64>,
+    },
+    Array {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("array"),
+        items: Option<Box<Schema>>,
+    },
+    Tuple {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("array"),
+        items: MustBe!(false),
+        prefix_items: Vec<Schema>,
+    },
+    AllOf {
+        title: Option<String>,
+        #[serde(rename = "allOf")]
+        all_of: Vec<Schema>,
+    },
+    OneOf {
+        title: Option<String>,
+        #[serde(rename = "oneOf")]
+        one_of: Vec<Schema>,
+        discriminant: Option<String>,
+    },
+    AnyOf {
+        title: Option<String>,
+        #[serde(rename = "anyOf")]
+        any_of: Vec<Schema>,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
@@ -82,7 +149,7 @@ mod test {
     fn test_parse_complex_schema() {
         let content = fs::read_to_string("./resources/asyncapi.yaml").unwrap();
         let parsed_yaml = serde_yaml::from_str::<Value>(&content).unwrap();
-        let parsed_schema = serde_yaml::from_value::<HashMap<String, SchemaDef>>(
+        let _parsed_schema = serde_yaml::from_value::<HashMap<String, SchemaDef>>(
             parsed_yaml["components"]["schemas"].clone(),
         )
         .unwrap();
@@ -91,24 +158,11 @@ mod test {
     #[test]
     fn test_parse_object_schema() {
         let yaml = r#"
-            RequestBase:
-              properties:
-                id:
-                  type: string
-                kind:
-                  type: string
-                  const: request
-                myDate:
-                  type: string
-                  format: date-time
-                enumProp:
-                  type: string
-                  enum: [one, two, three]
-                refProperty:
-                  $ref: '#/components/schemas/RefProperty'
-              required:
-                - id
-                - kind
+            GetUser:
+              type: object
+              additionalProperties:
+                ref: '#/components/schemas/SomeOtherEntity'
+              
         "#;
         let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
@@ -117,14 +171,17 @@ mod test {
     fn test_parse_schema_combinators() {
         let yaml = r#"
             GetUser:
-              type: object
               description: TODO
               allOf:
               - $ref: '#/components/schemas/RequestBase'
               - type: object
+                additionalProperties: false
                 properties:
                   event:
+                    type: string
                     const: deezNuts
+                  arrayType:
+                    type: array
                   data:
                     title: GetUserData
                     type: object

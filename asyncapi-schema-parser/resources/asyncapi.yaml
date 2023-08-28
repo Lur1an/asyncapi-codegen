@@ -26,11 +26,13 @@ components:
   schemas:
     RequestBase:
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
           description: "correlation id to match request and response"
         kind:
+          type: string
           const: request
       required:
         - id
@@ -39,10 +41,13 @@ components:
     GetUser:
       description: TODO
       discriminant: balls
-      allOf:
+      oneOf:
       - $ref: '#/components/schemas/RequestBase'
-      - properties:
+      - type: object 
+        additionalProperties: false
+        properties:
           event:
+            type: string
             const: deezNuts
           data:
             title: GetUserData
@@ -62,7 +67,13 @@ components:
       - $ref: '#/components/schemas/RequestBase'
       - type: object
         properties:
+          child:
+            type: array
+            prefixItems:
+              - type: object
+              - type: string
           event:
+            type: string
             const: someRandomVALUE
           data:
             title: DeleteUserData
