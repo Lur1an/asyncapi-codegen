@@ -1,4 +1,4 @@
-# AsyncAPI Schema Parser
+# AsyncAPI Schema Parser & Code Generator
 A language agnostic model generator for AsyncAPI schemas. (Rust only for now, next planned: python + pydantic)
 
 ## How to Use
