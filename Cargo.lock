@@ -16,6 +16,7 @@ dependencies = [
  "lazy_static",
  "monostate",
  "pretty_assertions",
+ "proc-macro2",
  "quote",
  "rayon",
  "serde",

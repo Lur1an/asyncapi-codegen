@@ -77,7 +77,7 @@ pub enum EntityDef {
     /// e.g. in Rust the `discriminant` would represent the value inside of
     /// `#[serde(tag="<discriminant>")]`, if not provided `#[serde(untagged)]` is used
     /// Specific values for discriminants that need to be placed in `#[serde(rename="<value>")]`
-    /// will be scanned in `Const` fields in the Entity types of the variants
+    /// will be scanned in `Const` fields in the Entity types of the variants (this feature is
     OneOf {
         discriminant: Option<String>,
         variants: Vec<String>,
@@ -260,7 +260,7 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
             entities.push(one_of_def);
             return entities;
         },
-        SchemaDef::AnyOf { any_of, .. } => todo!(),
+        SchemaDef::AnyOf { .. } => panic!("AnyOf not supported yet!..."),
         _ => panic!(
             "Can't parse this type ({:?}) as an entity, only variants allowed: (AllOf, OneOf, AnyOf, Object)", def
         ),
@@ -268,7 +268,8 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
 }
 
 /// Entry point for this module, turns a Mapping of `SchemaDef` into a list of `Entity` that a
-/// generator can consume to generate code
+/// generator can consume to generate code. TODO: duplicate struct identifiers cause code to be generated
+/// that won't compile.
 pub fn parse_schema_def_collection(schema: HashMap<String, SchemaDef>) -> Vec<Entity> {
     schema
         .into_par_iter()

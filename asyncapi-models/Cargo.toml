@@ -10,6 +10,7 @@ anyhow = "1.0.75"
 lazy_static = "1.4.0"
 monostate = "0.1.9"
 pretty_assertions = "1.4.0"
+proc-macro2 = "1.0.66"
 quote = "1.0.33"
 rayon = "1.7.0"
 serde = { version = "1.0.185", features = ["derive"] }

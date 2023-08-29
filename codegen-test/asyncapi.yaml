@@ -25,11 +25,13 @@ components:
       
   schemas:
     RequestBase:
+      type: object
       properties:
         id:
           type: string
           description: "correlation id to match request and response"
         kind:
+          type: string
           const: request
       required:
         - id
@@ -39,11 +41,11 @@ components:
       description: TODO
       allOf:
       - $ref: '#/components/schemas/RequestBase'
-      - properties:
-          retardObject:
-            allOf:
-              - const: string
+      - type: object
+        title: GetUserInner
+        properties:
           event:
+            type: string
             const: deezNuts
           data:
             title: GetUserData
@@ -64,6 +66,7 @@ components:
       - type: object
         properties:
           event:
+            type: string
             const: someRandomVALUE
           data:
             title: DeleteUserData
