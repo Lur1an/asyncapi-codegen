@@ -20,7 +20,7 @@ of the specification and creating the specific `item` type for the `array` items
 - Currently only integers are supported and any `format` directive is simply ignored
 ## Sidenote for Rust users
 - For `OneOf` schemas with a specific `discriminator` set it currently only works if the discriminator matches the name of the entity (For anonymous entity set the `title` property for a deterministic name), otherwise if you use special values for the discriminator inside of `const` fields you need to omit the `discriminator` for now and just use the `#[serde(untagged)]` enum that is generated, `const` fields will be respected through the use of the `monostate` crate.
-- `AllOf` schemas currently don't merge properties, out of lazyness they create struct for inner schemas and then put them in a single struct through `#[serde(flatten)]`
+- `AllOf` schemas currently don't merge properties, out of lazyness they create struct for inner schemas and then put them in a single struct through `#[serde(flatten)]`. (Out of simplicity I may use a solution like this in other languages, having a named empty class inherit from anonymous/named structs for its fields)
 ## Planned
 - A CLI tool for code generation
 - Python `pydantic` model generator
