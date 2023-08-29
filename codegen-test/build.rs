@@ -4,7 +4,7 @@ fn main() {
     let dest_path = Path::new(&out_dir).join("asyncapi.rs");
     let spec_path = Path::new("./asyncapi.yaml");
     let yaml_data = fs::read_to_string(spec_path).unwrap();
-    let codegen = asyncapi_models::generate_code_from_yaml(&yaml_data);
+    let codegen = asyncapi_models::generate_rust(&yaml_data);
     std::fs::write(&dest_path, codegen).unwrap();
     Command::new("rustfmt")
         .arg(&dest_path)

@@ -44,9 +44,6 @@ components:
       - type: object
         title: GetUserInner
         properties:
-          event:
-            type: string
-            const: deezNuts
           data:
             title: GetUserData
             type: object
@@ -65,9 +62,6 @@ components:
       - $ref: '#/components/schemas/RequestBase'
       - type: object
         properties:
-          event:
-            type: string
-            const: someRandomVALUE
           data:
             title: DeleteUserData
             type: object
