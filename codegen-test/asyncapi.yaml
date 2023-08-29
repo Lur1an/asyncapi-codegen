@@ -26,6 +26,8 @@ components:
   schemas:
     RequestBase:
       type: object
+      additionalProperties:
+        type: array
       properties:
         id:
           type: string
@@ -35,7 +37,6 @@ components:
           const: request
       required:
         - id
-        - kind
 
     GetUser:
       description: TODO

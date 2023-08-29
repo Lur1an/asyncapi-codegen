@@ -82,6 +82,7 @@ pub enum SchemaDef {
         #[serde(rename = "type")]
         schema_type: MustBe!("object"),
         #[serde(default)]
+        #[serde(rename = "additionalProperties")]
         additional_properties: AdditionalProperties,
         properties: Option<HashMap<String, Schema>>,
         #[serde(default)]
