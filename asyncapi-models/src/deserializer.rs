@@ -119,7 +119,7 @@ pub enum SchemaDef {
         title: Option<String>,
         #[serde(rename = "oneOf")]
         one_of: Vec<Schema>,
-        discriminant: Option<String>,
+        discriminator: Option<String>,
     },
     AnyOf {
         title: Option<String>,

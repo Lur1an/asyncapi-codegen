@@ -252,7 +252,7 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
         },
         SchemaDef::OneOf {
             one_of,
-            discriminant,
+            discriminator: discriminant,
             ..
         } => {
             let (variants, mut entities) = parse_combinator_schemas(one_of);
