@@ -26,3 +26,6 @@ of the specification and creating the specific `item` type for the `array` items
 - Python `pydantic` model generator
 - A protobuf generator
 
+## Issues
+The `deserializer` defines `untagged` enums with `monostate::MustBe` for the deserialization of a schema, this leads to quite unhelpful error messages when you schema does not match, most of the errors are `Did not match any variant in SchemaDef`
+
