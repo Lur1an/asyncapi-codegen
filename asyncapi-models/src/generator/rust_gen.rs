@@ -86,6 +86,7 @@ fn generate_entity(entity: Entity) -> String {
                         }
                     } else {
                         quote! {
+                            #[serde(rename = #name)]
                             #field_name: #field_type
                         }
                     }

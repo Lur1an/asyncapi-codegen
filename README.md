@@ -29,3 +29,137 @@ of the specification and creating the specific `item` type for the `array` items
 ## Issues
 The `deserializer` defines `untagged` enums with `monostate::MustBe` for the deserialization of a schema, this leads to quite unhelpful error messages when you schema does not match, most of the errors are `Did not match any variant in SchemaDef`
 
+## Sample
+Asyncapi schema definitions:
+```yaml
+schemas:
+RequestBase:
+  type: object
+  additionalProperties:
+    type: array
+  properties:
+    id:
+      type: string
+      description: "correlation id to match request and response"
+    kind:
+      type: string
+      const: request
+    tupleProp:
+      type: array
+      items: false
+      prefixItems:
+       - type: string
+       - type: object
+  required:
+    - id
+
+GetUser:
+  description: TODO
+  allOf:
+  - $ref: '#/components/schemas/RequestBase'
+  - type: object
+    title: GetUserInner
+    properties:
+      data:
+        title: GetUserData
+        type: object
+        properties:
+          userId:
+            type: string
+          name:
+            type: string
+        required:
+          - userId
+    required:
+      - data
+      - event
+
+DeleteUser:
+  description: TODO
+  allOf:
+  - $ref: '#/components/schemas/RequestBase'
+  - type: object
+    title: DeleteUserInner
+    properties:
+      data:
+        title: DeleteUserData
+        type: object
+        properties:
+          userId:
+            type: string
+        required:
+          - userId
+    required:
+      - data
+      - event
+
+SampleRequestPayload:
+  description: "SampleRequestPayload"
+  discriminator: event
+  oneOf:
+    - $ref: '#/components/schemas/GetUser'
+    - $ref: '#/components/schemas/DeleteUser'
+```
+Generated rust code:
+```rust
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct RequestBase {
+    #[serde(rename = "id")]
+    id: String,
+    #[serde(rename = "kind")]
+    kind: Option<monostate::MustBe!("request")>,
+    #[serde(rename = "tupleProp")]
+    tuple_prop: Option<(String, serde_json::Value)>,
+    #[serde(flatten)]
+    additional_properties: std::collections::HashMap<String, Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct DeleteUserData {
+    #[serde(rename = "userId")]
+    user_id: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct DeleteUserInner {
+    #[serde(rename = "data")]
+    data: DeleteUserData,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct DeleteUser {
+    #[serde(flatten)]
+    request_base: RequestBase,
+    #[serde(flatten)]
+    delete_user_inner: DeleteUserInner,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct GetUserData {
+    #[serde(rename = "userId")]
+    user_id: String,
+    #[serde(rename = "name")]
+    name: Option<String>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct GetUserInner {
+    #[serde(rename = "data")]
+    data: GetUserData,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+pub struct GetUser {
+    #[serde(flatten)]
+    request_base: RequestBase,
+    #[serde(flatten)]
+    get_user_inner: GetUserInner,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, serde :: Deserialize, serde :: Serialize)]
+#[serde(tag = "event")]
+pub enum SampleRequestPayload {
+    GetUser(GetUser),
+    DeleteUser(DeleteUser),
+}
+```

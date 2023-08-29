@@ -29,17 +29,13 @@ components:
       additionalProperties:
         type: array
       properties:
-        stuff:
-          type: object
-          additionalProperties:
-            type: array
         id:
           type: string
           description: "correlation id to match request and response"
         kind:
           type: string
           const: request
-        tupleProperty:
+        tupleProp:
           type: array
           items: false
           prefixItems:
@@ -61,6 +57,8 @@ components:
             properties:
               userId:
                 type: string
+              name:
+                type: string
             required:
               - userId
         required:
@@ -72,6 +70,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/RequestBase'
       - type: object
+        title: DeleteUserInner
         properties:
           data:
             title: DeleteUserData
@@ -79,11 +78,8 @@ components:
             properties:
               userId:
                 type: string
-              userName: 
-                type: string
             required:
               - userId
-              - userName
         required:
           - data
           - event
@@ -94,9 +90,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/GetUser'
         - $ref: '#/components/schemas/DeleteUser'
-
             
-
 
 
     
