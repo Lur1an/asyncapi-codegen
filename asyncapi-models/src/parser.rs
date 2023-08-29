@@ -122,6 +122,18 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
             (FieldType::Named(name), vec![])
         }
         Schema::Def(schema_def) => match schema_def {
+            // `properties = None` indicates a `HashMap` type
+            SchemaDef::Object {
+                properties: None,
+                additional_properties,
+                ..
+            } => match additional_properties {
+                AdditionalProperties::Boolean(_) => (FieldType::Object(None), vec![]),
+                AdditionalProperties::Schema(schema) => {
+                    let (field_type, entities) = parse_schema(*schema);
+                    (FieldType::Object(Some(Box::new(field_type))), entities)
+                }
+            },
             SchemaDef::Object { ref title, .. }
             | SchemaDef::AllOf { ref title, .. }
             | SchemaDef::OneOf { ref title, .. }
@@ -163,7 +175,18 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                 }
                 None => (FieldType::Array(None), vec![]),
             },
-            SchemaDef::Tuple { prefix_items, .. } => todo!(),
+            SchemaDef::Tuple { prefix_items, .. } => {
+                let mut entities = vec![];
+                let field_types = prefix_items
+                    .into_iter()
+                    .map(|tuple_item| {
+                        let (field_type, mut parsed_entities) = parse_schema(tuple_item);
+                        entities.append(&mut parsed_entities);
+                        field_type
+                    })
+                    .collect();
+                (FieldType::Tuple(field_types), entities)
+            }
         },
     }
 }

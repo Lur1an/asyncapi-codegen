@@ -109,6 +109,7 @@ pub enum SchemaDef {
         #[serde(rename = "type")]
         schema_type: MustBe!("array"),
         items: MustBe!(false),
+        #[serde(rename = "prefixItems")]
         prefix_items: Vec<Schema>,
     },
     AllOf {

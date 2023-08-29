@@ -29,12 +29,22 @@ components:
       additionalProperties:
         type: array
       properties:
+        stuff:
+          type: object
+          additionalProperties:
+            type: array
         id:
           type: string
           description: "correlation id to match request and response"
         kind:
           type: string
           const: request
+        tupleProperty:
+          type: array
+          items: false
+          prefixItems:
+           - type: string
+           - type: object
       required:
         - id
 
