@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use monostate::MustBe;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SchemaRef {
     #[serde(rename = "$ref")]
     pub schema_path: String,
@@ -18,7 +18,7 @@ impl SchemaRef {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum SchemaType {
     Object,
@@ -28,7 +28,7 @@ pub enum SchemaType {
     Array,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Format {
     Int32,
@@ -42,7 +42,7 @@ pub enum Format {
     DateTime,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum PrimitiveType<T> {
@@ -59,7 +59,7 @@ pub enum PrimitiveType<T> {
     },
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum AdditionalProperties {
@@ -73,7 +73,7 @@ impl Default for AdditionalProperties {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum SchemaDef {
@@ -99,6 +99,16 @@ pub enum SchemaDef {
         schema_type: MustBe!("integer"),
         #[serde(flatten)]
         type_def: PrimitiveType<i64>,
+    },
+    Boolean {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("boolean"),
+    },
+    Number {
+        #[serde(rename = "type")]
+        schema_type: MustBe!("number"),
+        #[serde(flatten)]
+        type_def: PrimitiveType<f64>,
     },
     Array {
         #[serde(rename = "type")]
@@ -130,7 +140,7 @@ pub enum SchemaDef {
     },
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 /// A Schema can either be a $ref to another Schema or a Definition of a Schema.
 /// This deserializer assumes all top-level types are `SchemaDef`

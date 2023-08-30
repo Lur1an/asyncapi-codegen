@@ -166,7 +166,21 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
             SchemaDef::Integer { type_def, .. } => match type_def {
                 PrimitiveType::Const { const_value } => todo!(),
                 PrimitiveType::Enum { enum_values } => todo!(),
-                PrimitiveType::Basic { format } => (FieldType::Simple(Primitive::Int), vec![]),
+                PrimitiveType::Basic { format } => match format {
+                    Some(Format::Int64) => (FieldType::Simple(Primitive::Long), vec![]),
+                    Some(Format::Int32) => (FieldType::Simple(Primitive::Int), vec![]),
+                    _ => (FieldType::Simple(Primitive::Int), vec![]),
+                },
+            },
+            SchemaDef::Boolean { .. } => (FieldType::Simple(Primitive::Bool), vec![]),
+            SchemaDef::Number { type_def, .. } => match type_def {
+                PrimitiveType::Const { const_value } => todo!(),
+                PrimitiveType::Enum { enum_values } => todo!(),
+                PrimitiveType::Basic { format } => match format {
+                    Some(Format::Float) => (FieldType::Simple(Primitive::Float), vec![]),
+                    Some(Format::Double) => (FieldType::Simple(Primitive::Double), vec![]),
+                    _ => (FieldType::Simple(Primitive::Float), vec![]),
+                },
             },
             SchemaDef::Array { items, .. } => match items {
                 Some(schema) => {
