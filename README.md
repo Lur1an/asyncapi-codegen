@@ -1,5 +1,5 @@
-# AsyncAPI Schema Parser & Code Generator
-A language agnostic model generator for AsyncAPI schemas. (Rust only for now, next planned: python + pydantic)
+# Schema Parser & Code Generator
+A language agnostic model generator for a subset of [JSON schemas](https://json-schema.org/specification-links.html#draft-7). (Rust only for now, next planned: python + pydantic)
 
 ## How to Use
 Check out the `codegen-test` crate to see how it can be used to generate your code at compile time.
@@ -31,8 +31,8 @@ The `deserializer` defines `untagged` enums with `monostate::MustBe` for the des
 
 ## Sample
 Asyncapi schema definitions:
+
 ```yaml
-schemas:
 RequestBase:
   type: object
   additionalProperties:
