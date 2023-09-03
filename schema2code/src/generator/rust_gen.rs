@@ -39,7 +39,7 @@ fn expand_field_type(field_type: FieldType) -> String {
             Primitive::Bool => "bool".into(),
             Primitive::Long => "i64".into(),
             Primitive::Float => "f32".into(),
-            Primitive::Uuid => "uuid:Uuid".into(),
+            Primitive::Uuid => "uuid::Uuid".into(),
             Primitive::Bytes => "Vec<u8>".into(),
         },
         FieldType::Const(primitive, value) => match primitive {
