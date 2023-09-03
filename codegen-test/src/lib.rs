@@ -8,6 +8,6 @@ mod test {
 
     #[test]
     fn test() {
-        let x: GetUser;
+        let x: SampleRequestPayload;
     }
 }

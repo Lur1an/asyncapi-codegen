@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use deserializer::SchemaDef;
+use std::collections::HashMap;
 
 mod deserializer;
 mod generator;

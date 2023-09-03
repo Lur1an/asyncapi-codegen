@@ -90,6 +90,17 @@ components:
       oneOf:
         - $ref: '#/components/schemas/GetUser'
         - $ref: '#/components/schemas/DeleteUser'
+        - discriminator: deez
+          oneOf:
+            - type: object
+              title: Variant1
+              properties:
+                deez:
+                  type: string
+            - type: object
+              title: Variant2
+              additionalProperties: true
+              
             
 
 

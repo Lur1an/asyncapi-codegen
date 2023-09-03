@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "codegen-test",
-    "asyncapi-models"
+    "schema2code"
 ]

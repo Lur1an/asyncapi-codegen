@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-asyncapi-models = { path = "../asyncapi-models" }
+schema2code = { path = "../schema2code" }
 
 [dependencies]
 monostate = "0.1.9"

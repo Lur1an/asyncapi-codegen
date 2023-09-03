@@ -77,7 +77,8 @@ pub enum EntityDef {
     /// e.g. in Rust the `discriminant` would represent the value inside of
     /// `#[serde(tag="<discriminant>")]`, if not provided `#[serde(untagged)]` is used
     /// Specific values for discriminants that need to be placed in `#[serde(rename="<value>")]`
-    /// will be scanned in `Const` fields in the Entity types of the variants (this feature is
+    /// will be scanned in `Const` fields in the Entity types of the variants (this feature is WIP
+    /// and not prioritized yet)
     OneOf {
         discriminant: Option<String>,
         variants: Vec<String>,

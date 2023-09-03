@@ -9,23 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 
 [[package]]
-name = "asyncapi-models"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "lazy_static",
- "monostate",
- "pretty_assertions",
- "proc-macro2",
- "quote",
- "rayon",
- "serde",
- "serde_json",
- "serde_yaml",
- "syn",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -41,8 +24,8 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "codegen-test"
 version = "0.1.0"
 dependencies = [
- "asyncapi-models",
  "monostate",
+ "schema2code",
  "serde",
  "serde_json",
 ]
@@ -243,6 +226,23 @@ name = "ryu"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
+
+[[package]]
+name = "schema2code"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "lazy_static",
+ "monostate",
+ "pretty_assertions",
+ "proc-macro2",
+ "quote",
+ "rayon",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "syn",
+]
 
 [[package]]
 name = "scopeguard"
