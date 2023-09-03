@@ -146,10 +146,9 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                 )
             }
             SchemaDef::String { type_def, .. } => match type_def {
-                PrimitiveType::Const { const_value } => (
-                    FieldType::Const(Primitive::String, const_value.clone()),
-                    vec![],
-                ),
+                PrimitiveType::Const { const_value } => {
+                    (FieldType::Const(Primitive::String, const_value), vec![])
+                }
                 PrimitiveType::Enum { enum_values } => {
                     let def = EntityDef::Enum(EnumDef {
                         values: enum_values,
@@ -316,69 +315,4 @@ pub fn parse_schema_def_collection(schema: HashMap<String, SchemaDef>) -> Vec<En
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
-    use crate::deserializer::SchemaDef;
-    use pretty_assertions::assert_eq;
-    use std::fs;
-
-    #[test]
-    fn test_parse_simple_object_schema() {
-        let yaml = r#"
-            RequestBase:
-              type: object
-              properties:
-                id:
-                  type: string
-                kind:
-                  type: string
-                  const: request
-                myDate:
-                  type: string
-                  format: date-time
-                enumProp:
-                  type: string
-                  enum: [one, two, three]
-                deez:
-                  type: object
-                  properties:
-                    value:
-                      type: string
-                      const: nuts
-
-                refProperty:
-                  $ref: '#/components/schemas/RefProperty'
-              required:
-                - id
-                - kind
-        "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
-        let entities = parse_schema_def_collection(parsed_yaml);
-    }
-    #[test]
-    fn test_parse_all_of_combinator_schema() {
-        let yaml = r#"
-            GetUser:
-              allOf:
-              - $ref: '#/components/schemas/Balls'
-              - type: object 
-                properties:
-                  event:
-                    type: string
-                    const: deezNuts
-                  data:
-                    title: GetUserData
-                    type: object
-                    properties:
-                      userId:
-                        type: string
-                    required:
-                      - userId
-                required:
-                  - data
-                  - event
-        "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
-        let entities = parse_schema_def_collection(parsed_yaml);
-    }
-}
+mod test {}

@@ -159,7 +159,7 @@ mod test {
 
     #[test]
     fn test_parse_complex_schema() {
-        let content = fs::read_to_string("./resources/asyncapi.yaml").unwrap();
+        let content = include_str!("../resources/asyncapi.yaml");
         let parsed_yaml = serde_yaml::from_str::<Value>(&content).unwrap();
         let _parsed_schema = serde_yaml::from_value::<HashMap<String, SchemaDef>>(
             parsed_yaml["components"]["schemas"].clone(),
@@ -173,10 +173,10 @@ mod test {
             GetUser:
               type: object
               additionalProperties:
-                ref: '#/components/schemas/SomeOtherEntity'
+                $ref: '#/components/schemas/SomeOtherEntity'
               
         "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let _ = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
 
     #[test]
@@ -206,7 +206,7 @@ mod test {
                   - data
                   - event
         "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let _ = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
 
     #[test]
@@ -216,7 +216,7 @@ mod test {
                 type: string
                 description: "correlation id to match request and response"
         "#;
-        let parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let _ = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
 
     #[test]
@@ -226,6 +226,6 @@ mod test {
                 type: string
                 const: nuts
         "#;
-        let _parsed_yaml = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let _ = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
     }
 }
