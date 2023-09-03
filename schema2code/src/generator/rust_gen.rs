@@ -1,3 +1,4 @@
+use super::snake_case;
 use proc_macro2::TokenStream;
 use quote::quote;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
@@ -10,22 +11,6 @@ pub fn generate_code(entities: Vec<Entity>) -> String {
         .map(generate_entity)
         .collect::<Vec<_>>();
     code.join("\n")
-}
-
-fn snake_case(s: &str) -> String {
-    let (first, rest) = s.split_at(1);
-    let first = first.chars().next().unwrap();
-    let mut out = String::new();
-    out.push(first.to_lowercase().next().unwrap());
-    for c in rest.chars() {
-        if c.is_uppercase() {
-            out.push('_');
-            out.push(c.to_lowercase().next().unwrap())
-        } else {
-            out.push(c);
-        }
-    }
-    out
 }
 
 fn expand_field_type(field_type: FieldType) -> String {
@@ -180,17 +165,6 @@ mod test {
     use crate::parser::{Field, StructDef};
 
     use super::*;
-
-    #[test]
-    fn test_snake_case() {
-        let s = "DeezNuts";
-        let snake = snake_case(s);
-        assert_eq!(snake, "deez_nuts");
-
-        let s = "deezNutsOnYourChin69420";
-        let snake = snake_case(s);
-        assert_eq!(snake, "deez_nuts_on_your_chin69420");
-    }
 
     #[test]
     fn test_generate_struct() {

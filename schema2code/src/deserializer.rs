@@ -38,6 +38,7 @@ pub enum Format {
     Byte,
     Binary,
     Date,
+    Uuid,
     #[serde(rename = "date-time")]
     DateTime,
 }
