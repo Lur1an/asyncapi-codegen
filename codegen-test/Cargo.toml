@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-schema2code = { path = "../schema2code" }
+schema2code = { path = "../schema2code", version = "0.1.0" }
 serde_yaml = "0.9.25"
 
 [dependencies]
