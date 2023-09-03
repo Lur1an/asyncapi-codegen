@@ -43,7 +43,7 @@ fn expand_field_type(field_type: FieldType) -> String {
         FieldType::Tuple(tuple_types) => {
             let tuple_types = tuple_types
                 .into_iter()
-                .map(|field_type| expand_field_type(field_type))
+                .map(expand_field_type)
                 .collect::<Vec<_>>();
             format!("({})", tuple_types.join(", "))
         }

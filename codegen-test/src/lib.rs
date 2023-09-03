@@ -8,6 +8,6 @@ mod test {
 
     #[test]
     fn test() {
-        let x: SampleRequestPayload;
+        let _x: SampleRequestPayload;
     }
 }

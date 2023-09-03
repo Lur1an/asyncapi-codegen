@@ -12,7 +12,7 @@ pub struct SchemaRef {
 impl SchemaRef {
     pub fn get_schema_name(&self) -> &str {
         self.schema_path
-            .split("/")
+            .split('/')
             .last()
             .expect("Incorrect Ref Path")
     }

@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::deserializer::{
-    AdditionalProperties, Format, PrimitiveType, Schema, SchemaDef, SchemaType,
+    AdditionalProperties, Format, PrimitiveType, Schema, SchemaDef,
 };
 
 /// A type for a field in a struct
@@ -161,11 +161,11 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                     let enum_entity = Entity { name, def };
                     (field_type, vec![enum_entity])
                 }
-                PrimitiveType::Basic { format } => (FieldType::Simple(Primitive::String), vec![]),
+                PrimitiveType::Basic { format: _ } => (FieldType::Simple(Primitive::String), vec![]),
             },
             SchemaDef::Integer { type_def, .. } => match type_def {
-                PrimitiveType::Const { const_value } => todo!(),
-                PrimitiveType::Enum { enum_values } => todo!(),
+                PrimitiveType::Const { const_value: _ } => todo!(),
+                PrimitiveType::Enum { enum_values: _ } => todo!(),
                 PrimitiveType::Basic { format } => match format {
                     Some(Format::Int64) => (FieldType::Simple(Primitive::Long), vec![]),
                     Some(Format::Int32) => (FieldType::Simple(Primitive::Int), vec![]),
@@ -174,8 +174,8 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
             },
             SchemaDef::Boolean { .. } => (FieldType::Simple(Primitive::Bool), vec![]),
             SchemaDef::Number { type_def, .. } => match type_def {
-                PrimitiveType::Const { const_value } => todo!(),
-                PrimitiveType::Enum { enum_values } => todo!(),
+                PrimitiveType::Const { const_value: _ } => todo!(),
+                PrimitiveType::Enum { enum_values: _ } => todo!(),
                 PrimitiveType::Basic { format } => match format {
                     Some(Format::Float) => (FieldType::Simple(Primitive::Float), vec![]),
                     Some(Format::Double) => (FieldType::Simple(Primitive::Double), vec![]),
@@ -278,13 +278,13 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
                 name,
                 def: EntityDef::Struct(struct_def),
             });
-            return entities;
+            entities
         }
         SchemaDef::AllOf { all_of, .. } => {
             let (all_of_entity_names, mut entities) = parse_combinator_schemas(all_of);
             let all_of_def = Entity { def: EntityDef::AllOf(all_of_entity_names), name };
             entities.push(all_of_def);
-            return entities;
+            entities
 
         },
         SchemaDef::OneOf {
@@ -295,7 +295,7 @@ fn parse_entity(def: SchemaDef, name: String) -> Vec<Entity> {
             let (variants, mut entities) = parse_combinator_schemas(one_of);
             let one_of_def = Entity { def: EntityDef::OneOf { discriminant, variants }, name };
             entities.push(one_of_def);
-            return entities;
+            entities
         },
         SchemaDef::AnyOf { .. } => panic!("AnyOf not supported yet!..."),
         _ => panic!(
