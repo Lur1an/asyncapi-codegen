@@ -3,9 +3,7 @@ use std::{collections::HashMap, sync::atomic::AtomicU32};
 use lazy_static::lazy_static;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::deserializer::{
-    AdditionalProperties, Format, PrimitiveType, Schema, SchemaDef,
-};
+use crate::deserializer::{AdditionalProperties, Format, PrimitiveType, Schema, SchemaDef};
 
 /// A type for a field in a struct
 #[derive(Debug, Clone)]
@@ -44,6 +42,8 @@ pub enum Primitive {
     Double,
     String,
     Bool,
+    Uuid,
+    Bytes,
 }
 
 /// A type for a field in a struct/class
@@ -161,7 +161,11 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                     let enum_entity = Entity { name, def };
                     (field_type, vec![enum_entity])
                 }
-                PrimitiveType::Basic { format: _ } => (FieldType::Simple(Primitive::String), vec![]),
+                PrimitiveType::Basic { format } => match format {
+                    Some(Format::Uuid) => (FieldType::Simple(Primitive::Uuid), vec![]),
+                    Some(Format::Byte) => (FieldType::Simple(Primitive::Bytes), vec![]),
+                    _ => (FieldType::Simple(Primitive::String), vec![]),
+                },
             },
             SchemaDef::Integer { type_def, .. } => match type_def {
                 PrimitiveType::Const { const_value: _ } => todo!(),

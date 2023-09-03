@@ -39,6 +39,8 @@ fn expand_field_type(field_type: FieldType) -> String {
             Primitive::Bool => "bool".into(),
             Primitive::Long => "i64".into(),
             Primitive::Float => "f32".into(),
+            Primitive::Uuid => "uuid:Uuid".into(),
+            Primitive::Bytes => "Vec<u8>".into(),
         },
         FieldType::Const(primitive, value) => match primitive {
             Primitive::String => format!("monostate::MustBe!(\"{}\")", value),
@@ -47,6 +49,8 @@ fn expand_field_type(field_type: FieldType) -> String {
             Primitive::Bool => format!("monostate::MustBe!({})", value),
             Primitive::Long => format!("monostate::MustBe!({})", value),
             Primitive::Float => format!("monostate::MustBe!({})", value),
+            Primitive::Uuid => todo!(),
+            Primitive::Bytes => todo!(),
         },
     }
 }
