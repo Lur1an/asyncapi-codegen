@@ -195,6 +195,8 @@ mod test {
                     const: deezNuts
                   arrayType:
                     type: array
+                    items:
+                        type: integer
                   data:
                     title: GetUserData
                     type: object
