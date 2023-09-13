@@ -152,11 +152,8 @@ pub enum Schema {
 
 #[cfg(test)]
 mod test {
-    use std::fs;
-
-    use serde_yaml::Value;
-
     use super::*;
+    use serde_yaml::Value;
 
     #[test]
     fn test_parse_complex_schema() {
