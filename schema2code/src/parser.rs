@@ -187,7 +187,13 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                             (FieldType::Simple(Primitive::Int), vec![])
                         }
                     }
-                    _ => (FieldType::Simple(Primitive::Int), vec![]),
+                    _ => {
+                        if minimum.is_some_and(|min| min >= 0) {
+                            (FieldType::Simple(Primitive::U64), vec![])
+                        } else {
+                            (FieldType::Simple(Primitive::Int), vec![])
+                        }
+                    }
                 },
             },
             SchemaDef::Boolean { .. } => (FieldType::Simple(Primitive::Bool), vec![]),
@@ -333,4 +339,39 @@ pub fn parse_schema_def_collection(schema: HashMap<String, SchemaDef>) -> Vec<En
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use std::collections::HashMap;
+
+    use crate::deserializer::SchemaDef;
+
+    use super::StructDef;
+
+    #[test]
+    fn test_parse_schema_with_uint() {
+        let yaml = r#"
+            GetUser:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  minimum: 69
+              required:
+                - id
+        "#;
+        let schema_def = serde_yaml::from_str::<HashMap<String, SchemaDef>>(yaml).unwrap();
+        let entities = super::parse_schema_def_collection(schema_def);
+        match &entities[0].def {
+            super::EntityDef::Struct(StructDef { properties, .. }) => {
+                let id_field = properties.get("id").unwrap();
+                assert!(
+                    matches!(
+                        id_field.field_type,
+                        super::FieldType::Simple(super::Primitive::U64)
+                    ),
+                    "Expected U64 type for id field, due to minimum > 0"
+                );
+            }
+            _ => panic!("Expected a Struct definition"),
+        }
+    }
+}
