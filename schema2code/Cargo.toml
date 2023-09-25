@@ -1,6 +1,6 @@
 [package]
 name = "schema2code"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Lurian <lurian-code@protonmail.com>"]
 description = "Generate Code in any language from a JSON Schema compliant document"
