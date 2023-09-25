@@ -71,12 +71,12 @@ fn generate_entity(entity: Entity) -> String {
                     if field.optional {
                         quote! {
                             #[serde(rename = #name)]
-                            #field_name: Option<#field_type>
+                            pub #field_name: Option<#field_type>
                         }
                     } else {
                         quote! {
                             #[serde(rename = #name)]
-                            #field_name: #field_type
+                            pub #field_name: #field_type
                         }
                     }
                 })
@@ -87,7 +87,7 @@ fn generate_entity(entity: Entity) -> String {
                     .unwrap();
                 fields.push(quote! {
                     #[serde(flatten)]
-                    additional_properties: std::collections::HashMap<String, #field_type>
+                    pub additional_properties: std::collections::HashMap<String, #field_type>
                 })
             }
 
@@ -134,7 +134,7 @@ fn generate_entity(entity: Entity) -> String {
                 let field_type = entity.parse::<TokenStream>().unwrap();
                 quote! {
                     #[serde(flatten)]
-                    #field_name: #field_type
+                    pub #field_name: #field_type
                 }
             });
             quote! {
