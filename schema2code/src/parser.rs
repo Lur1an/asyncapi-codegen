@@ -37,6 +37,8 @@ pub enum FieldType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Primitive {
     Int,
+    U32,
+    U64,
     Long,
     Float,
     Double,
@@ -161,7 +163,7 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
                     let enum_entity = Entity { name, def };
                     (field_type, vec![enum_entity])
                 }
-                PrimitiveType::Basic { format } => match format {
+                PrimitiveType::Basic { format, .. } => match format {
                     Some(Format::Uuid) => (FieldType::Simple(Primitive::Uuid), vec![]),
                     Some(Format::Byte) => (FieldType::Simple(Primitive::Bytes), vec![]),
                     _ => (FieldType::Simple(Primitive::String), vec![]),
@@ -170,9 +172,21 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
             SchemaDef::Integer { type_def, .. } => match type_def {
                 PrimitiveType::Const { const_value: _ } => todo!(),
                 PrimitiveType::Enum { enum_values: _ } => todo!(),
-                PrimitiveType::Basic { format } => match format {
-                    Some(Format::Int64) => (FieldType::Simple(Primitive::Long), vec![]),
-                    Some(Format::Int32) => (FieldType::Simple(Primitive::Int), vec![]),
+                PrimitiveType::Basic { format, minimum } => match format {
+                    Some(Format::Int64) => {
+                        if minimum.is_some_and(|min| min >= 0) {
+                            (FieldType::Simple(Primitive::U64), vec![])
+                        } else {
+                            (FieldType::Simple(Primitive::Long), vec![])
+                        }
+                    }
+                    Some(Format::Int32) => {
+                        if minimum.is_some_and(|min| min >= 0) {
+                            (FieldType::Simple(Primitive::U32), vec![])
+                        } else {
+                            (FieldType::Simple(Primitive::Int), vec![])
+                        }
+                    }
                     _ => (FieldType::Simple(Primitive::Int), vec![]),
                 },
             },
@@ -180,7 +194,7 @@ fn parse_schema(schema: Schema) -> (FieldType, Vec<Entity>) {
             SchemaDef::Number { type_def, .. } => match type_def {
                 PrimitiveType::Const { const_value: _ } => todo!(),
                 PrimitiveType::Enum { enum_values: _ } => todo!(),
-                PrimitiveType::Basic { format } => match format {
+                PrimitiveType::Basic { format, .. } => match format {
                     Some(Format::Float) => (FieldType::Simple(Primitive::Float), vec![]),
                     Some(Format::Double) => (FieldType::Simple(Primitive::Double), vec![]),
                     _ => (FieldType::Simple(Primitive::Float), vec![]),

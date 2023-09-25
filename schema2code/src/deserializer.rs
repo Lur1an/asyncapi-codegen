@@ -57,6 +57,7 @@ pub enum PrimitiveType<T> {
     },
     Basic {
         format: Option<Format>,
+        minimum: Option<T>,
     },
 }
 

@@ -41,6 +41,8 @@ fn expand_field_type(field_type: FieldType) -> String {
             Primitive::Float => "f32".into(),
             Primitive::Uuid => "uuid::Uuid".into(),
             Primitive::Bytes => "Vec<u8>".into(),
+            Primitive::U32 => "u32".into(),
+            Primitive::U64 => "u64".into(),
         },
         FieldType::Const(primitive, value) => match primitive {
             Primitive::String => format!("monostate::MustBe!(\"{}\")", value),
@@ -49,6 +51,8 @@ fn expand_field_type(field_type: FieldType) -> String {
             Primitive::Bool => format!("monostate::MustBe!({})", value),
             Primitive::Long => format!("monostate::MustBe!({})", value),
             Primitive::Float => format!("monostate::MustBe!({})", value),
+            Primitive::U32 => format!("monostate::MustBe!({})", value),
+            Primitive::U64 => format!("monostate::MustBe!({})", value),
             Primitive::Uuid => todo!(),
             Primitive::Bytes => todo!(),
         },
@@ -164,8 +168,6 @@ fn generate_entity(entity: Entity) -> String {
 
 #[cfg(test)]
 mod test {
-    use pretty_assertions::assert_eq;
-
     use crate::parser::{Field, StructDef};
 
     use super::*;
